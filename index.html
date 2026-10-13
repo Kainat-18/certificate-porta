@@ -1,1 +1,345 @@
-﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Certificate Portal</title><link rel="stylesheet" href="css/certificates.css"></head><body><header><a href="index.html"><img src="images/sha.png" alt="National Life Support Committee" width="240"></a><nav><a href="#verify">Verify certificate</a><a href="#manage">Manage certificates</a></nav></header><main><p id="setup" hidden>Supabase connection missing. Follow README.md to configure.</p><p id="message" role="status" aria-live="polite"></p><section id="verify"><small>CERTIFICATE VERIFICATION</small><h1>Certificate Details</h1><form id="search-form"><label for="search-serial">Certificate serial number</label><div class="actions"><input id="search-serial" required maxlength="80" placeholder="Enter serial number"><button>Search certificate</button></div></form><p id="search-status" role="status">Enter a serial number to view certificate details.</p><dl id="details" hidden></dl></section><section id="manage"><small>YOUR CERTIFICATES</small><h2>Create & manage entries</h2><p>Add and manage certificates below. ON entries appear in serial number search.</p><div id="workspace"><form id="certificate-form" class="grid"><label>Serial number<input name="serial_number" required maxlength="80" pattern="[A-Za-z0-9_-]+" title="Letters, numbers, hyphens and underscores only"></label><label>Certificate holder name<input name="holder_name" required maxlength="200"></label><label class="wide">Course name<input name="course_name" required maxlength="200"></label><label>Certificate valid from<input name="valid_from" type="date" required></label><label>Certificate expiry date<input name="expiry_date" type="date" required></label><div class="actions wide"><button id="save">Save certificate</button><button id="cancel" type="button" class="secondary" hidden>Cancel edit</button></div></form><h3>Saved entries</h3><p id="list-status" role="status"></p><div class="table-wrap"><table><thead><tr><th>Serial no.</th><th>Holder / Course</th><th>Validity</th><th>Status</th><th>Actions</th></tr></thead><tbody id="entries"></tbody></table></div></div></section></main><footer>Certificate verification portal</footer><script src="js/supabase-config.js"></script><script src="js/certificates.js" defer></script></body></html>
+<!DOCTYPE html><html lang="en-US"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> - KSA CPR</title>
+
+    <link rel="shortcut icon" href="images/favicon.png">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/animate.css">
+    <link rel="stylesheet" type="text/css" href="css/fontello.css">
+    <link rel="stylesheet" type="text/css" href="css/flaticon.css">
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="css/themify-icons.css">
+    <link rel="stylesheet" type="text/css" href="css/slick.css">
+    <link rel="stylesheet" type="text/css" href="css/prettyPhoto.css">
+    <link rel="stylesheet" type="text/css" href="css/shortcodes.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/megamenu.css">
+    <link rel="stylesheet" type="text/css" href="css/responsive.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <!-- REVOLUTION LAYERS STYLES -->
+    <link rel="stylesheet" id="rs-plugin-settings-css" href="css/rs6.css">
+</head>
+<body>
+    <div b-jkv0ph5dyo="" class="page">
+        <style>
+    .notification-item {
+        position: relative;
+    }
+
+        .notification-item .fa-bell {
+            /* Customize the bell icon as needed */
+            color: #333;
+            font-size: 18px;
+        }
+
+    .notification-badge {
+        position: absolute;
+        top: 35px;
+        right: 15px;
+        background-color: #ff5733;
+        color: #fff;
+        border-radius: 50%;
+        padding: 3px 5px;
+        font-size: 9px;
+    }
+
+     #site-header-menu .site-navigation ul.menu > li > a {
+         font-size: 11px !important;
+        
+    }
+
+</style>
+<!--header start-->
+<header id="masthead" class="header ttm-header-style-01" style="direction:ltr">
+    <!-- top_bar -->
+    <div class="top_bar ttm-textcolor-white ttm-bgcolor-darkgrey clearfix">
+        <div class="container">
+            <div class="pl-05 pr-05">
+                <div class="row">
+                    <div class="col-lg-5 d-flex flex-row align-items-center">
+                        <div class="top_bar_contact_item">
+                            <div class="top_bar_icon"><i class="fa fa-envelope-o"></i></div><a href="mailto:@contactUsEmail">cprregistration@sha.org.sa</a>
+                        </div>
+                        <div class="top_bar_contact_item">
+                            <div class="top_bar_icon"><i class="fa fa-phone"></i></div>+966 92 000 0742
+                        </div>
+                    </div>
+                    <div class="col-lg-7" style="text-align:right;">
+                        <a href="manage.html" style="padding-right:20px;" target="_blank" rel="noopener" aria-label="old website">Manage certificates</a>
+                        <div class="top_bar_contact_item ttm-bgcolor-white" style="float:right;">
+                            <div class="top_bar_social d-flex align-items-center">
+                                <ul class="social-icons" style="padding:0px 5px;">
+                                    <li><a href="https://ksacpr.org.sa/Login.aspx" style="color:#000; font-size:11px;" target="_blank" rel="noopener" aria-label="old website">To download certificates issued before 18 April 2024 kindly click here</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- top_bar end-->
+    <!-- site-header-menu -->
+    <div id="site-header-menu" class="site-header-menu ttm-textcolor-dark">
+        <div class="site-header-menu-inner ttm-stickable-header">
+            <div class="container">
+                <div class="ttm-bg ttm-col-bgcolor-yes ttm-bgcolor-white z-index-2">
+                    <div class="layer-content">
+                        <!--site-navigation -->
+                        <div class="site-navigation d-flex flex-row" style="padding: 0px 5px">
+                            <!-- site-branding -->
+                            <div class="site-branding me-10">
+                                <a class="home-link" href="index.html" title="Saudi Health Association" rel="home">
+                                    <img src="images/sha.png" id="logo-img" class="img-fluid auto_size" alt="image" width="200">
+                                </a>
+                            </div><!-- site-branding end -->
+                            <div class="btn-show-menu-mobile menubar menubar--squeeze">
+                                <span class="menubar-box">
+                                    <span class="menubar-inner"></span>
+                                </span>
+                            </div>
+                            <!-- menu -->
+                            <nav class="main-menu menu-mobile" id="menu">
+                                <ul class="menu ms-auto">
+                                    <li class="mega-menu-item notification-item">
+                                        <a href="#" class="mega-menu-link">
+                                            <span class="notification-badge" id="spnBadge">0</span>
+                                            <i class="fa fa-bell"></i>
+                                        </a>
+                                        <ul class="mega-submenu" id="dlActivities">
+                                            <li><span id="spnActivityList" style="color:#000; padding:10px;"></span></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <div class="d-flex flex-row align-items-center justify-content-end menu-mobile">
+                                </div>
+                            </nav>
+                            <div class="header_extra d-flex flex-row align-items-center justify-content-end">
+                                <div class="header_search">
+                                    <a href="#" class="btn-default search_btn" rel="noopener" aria-label="search"><i class="fa fa-search"></i></a>
+                                    <div class="header_search_content">
+                                        <form id="searchbox" method="get" action="index.html">
+                                            <input class="search_query" type="text" id="search_query" name="search_query" placeholder="Enter certificate serial number" required value="">
+                                            <button type="submit" class="btn close-search" aria-label="Right Align"><i class="fa fa-search"></i></button>
+                                        </form>
+                                        <div id="SearchResult" class="ttm-box-col-wrapper col-12 overflow-auto" style="max-height:250px">
+                                        </div>
+                                    </div>
+                                    <!--Search Results end-->
+                                </div>
+                            </div>
+
+                        </div><!-- site-navigation end-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- site-header-menu end-->
+</header><!--header end-->
+
+<script src="js/jquery.min.js"></script>
+
+
+        
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12" style="text-align:center">
+                <h2>
+                    <b>Certificate Verification</b>
+                </h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-10" style="box-shadow: 0 0 10px #b5b2b2; padding:20px; margin:100px 0px; background-color:#fff;">
+                <h1 id="certificate-heading">Certificate Details</h1><p id="verification-status" role="status" aria-live="polite">Use the search above to enter a certificate serial number.</p>
+                <hr>
+                    <p> <b>Certificate Holder Name:</b>  <span id="name">  </span>  </p>
+                    <p>  <b>Course Name:</b><span id="course">  </span> </p>
+                    <p> <b>Certificate Valid From:</b><span id="issueDate">  </span></p>
+                    <p> <b>Certificate Expiry Date:</b><span id="expiry">  </span></p>
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+    </div>
+</div>
+
+
+
+        
+<!--footer start-->
+<footer class="footer ttm-bgcolor-darkgrey text-base-white clearfix">
+    <div class="ttm-row-wrapper-bg-layer ttm-bg-layer"></div>
+    <div class="second-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3 widget-area" style="direction:" ltr;="">
+                    <div class="widget widget_text clearfix">
+                        <div class="footer-logo">
+                            <img id="footer-logo-img" class="img-fluid auto_size" style="max-height: 100%;" alt="image" width="100%" src="images/sha.png">
+                        </div>
+                        <h3 class="widget-title">About Us</h3>
+                        <div class="textwidget widget-text">
+                            <p style="text-align:justify">
+                                The Saudi Heart Association, hereafter called “The Association” is recognized at its premises and may have more chapters in other locations if needed.
+                            </p>
+                            <p style="text-align:justify">
+                                The progression and development of the scientific thinking in the speciality of the Association.
+                            </p>
+                        </div>
+                        <div class="footer-logo">
+                            <img src="images/sha-transparent.png" id="logo-img" class="img-fluid auto_size" alt="image" width="100%">
+                        </div>
+                    </div>
+                    <div class="widget widget_timing mt_5 res-991-mt-0 clearfix">
+
+                    <div class="ttm-timelist-block-wrapper">
+                    <ul class="ttm-timelist-block pr-15 mt_10">
+                                <li><a href="/AboutUs/Index"><span class="service-time">Read More</span></a></li>
+                    </ul>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-2 widget-area" style="direction:" ltr;="">
+                    <div class="widget widget_nav_menu clearfix">
+                        <h3 class="widget-title">Popular Courses</h3>
+                        <ul id="menu-footer-quick-links">
+                            <li><a href="#">SHA BLS Provider </a></li>
+                            <li><a href="#">SHA ACLS Provider</a></li>
+                            <li><a href="#">SHA PALS Provider</a></li>
+                            <li><a href="#">SHA NRP Provider</a></li>
+                            <li><a href="#">SHA HSFA CPR AED</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-0">
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 widget-area" style="direction:" ltr;="">
+                            <div class="widget widget_nav_menu clearfix">
+                                <h3 class="widget-title">Quick Links</h3>
+                                <ul class="widget_contact_wrapper res-991-mt_20">
+                                    <li><a href="/Home/Index">Home</a></li>
+                                    <li><a href="/Course/Index">Courses</a></li>
+                                    <li><a href="/OnlineCourses/Index">Online Courses</a></li>
+                                    <li><a href="/TrainingCenter/Index">Training Centers</a></li>
+                                    <li><a href="https://admin.shacpr.org.sa/Home/RegisterTrainingCenter">Become Training Center</a></li>
+                                    <li><a href="http://ksacpr.org.sa/">Browse for old cpr website</a></li>
+                                    <li><a href="https://admin.shacpr.org.sa" target="_b">For Instructors and Coordinator</a></li>
+                                    <li style="font-size:20px; font-weight:bold;"><a href="#">Contact Us</a></li>
+                                    <li style="font-size:25px;"><a target="_blank" href="http://tawk.to/shacprorgsa">Support</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 widget-area" style="direction:" ltr;="">
+                            <div class="widget widget_nav_menu clearfix">
+                                <h3 class="widget-title">Quick Help</h3>
+                                <ul class="widget_contact_wrapper res-991-mt_20">
+                                    <li><h5 style="font-size:13px !important;">CPR Chairman</h5><i class="fa fa-envelope-o"></i>�<a href="mailto:cprchairman@sha.org.sa">cprchairman@sha.org.sa</a></li>
+                                    <li><h5 style="font-size:13px !important;">CPR Registration</h5><i class="fa fa-envelope-o"></i>�<a href="mailto:CPRregistration@sha.org.sa">cprregistration@sha.org.sa</a></li>
+                                    <li><h5 style="font-size:13px !important;">CPR Operation</h5><i class="fa fa-envelope-o"></i>�<a href="mailto:CPRoperation@sha.org.sa">cproperation@sha.org.sa</a></li>
+                                    <li><h5 style="font-size:13px !important;">CPR Events</h5><i class="fa fa-envelope-o"></i>�<a href="mailto:CPRevents@sha.org.sa">cprevents@sha.org.sa</a></li>
+                                    <li><h5 style="font-size:13px !important;">CPR Help Desk</h5><i class="fa fa-envelope-o"></i>�<a href="mailto:CPRhelpdesk@sha.org.sa">cprhelpdesk@sha.org.sa</a></li>
+                                    <li>
+                                        <h3>Location</h3> "Az Zahra, MPQM+839، Al Hanouf Building, Al Ihsa Street, Al Malaz, Riyadh 12811
+"
+                                    </li>
+                                    <li style="direction:ltr!important;">
+                                        <h3>Call Us</h3>+966 92 000 0742
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 widget-area"></div>
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 widget-area" style="direction:" ltr;="">
+                            <div class="widget widget-recent-post clearfix">
+                                <h3 class="widget-title mb-10">Search E-Certificate</h3>
+                                <p>Enter the eCertificate ID in the box and click on verify button to verify your certificate</p>
+                                <form id="subscribe-form" class="newsletter-form" method="post" action="index.html" >
+                                    <div class="mailchimp-inputbox clearfix" id="subscribe-content">
+                                        <input type="text" name="Id" placeholder="Enter eCertificate ID" required="">
+                                        <button class="submit ttm-btn ttm-btn-style-fill ttm-icon-btn-right ttm-btn-size-md ttm-btn-color-white w-100" type="submit">Verify<i class="icon-right"></i></button>
+                                    </div>
+                                    <div id="subscribe-msg"></div>
+                                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8JPSGa9cEHpMt9H4I0iVhXKClezIScl1A9WqRv8Zr29cqrUMf-bXQu3hm1RYftK6F6BJS-maKdSi57VYWPY3g6h0aLjiG_QHJyVZHNLg4k1ZdweeIVZ65qbOeh7FN0r4UCJakfFX7V-1lKSkwTfqDU4"></form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-footer-text">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="bottom-lt-side-footer">
+                        <div class="pb-10">
+                            Copyright © 2025 Saudi Heart Association <b>Powered & Owned By Konoz Retaj IT </b><img src="images/kr-logo300.png" style="width:30px;">
+                        </div>
+                        <div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="bottom-rt-side-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<!--footer end-->
+        <form id="frmSiteUrl" action="/" method="post"></form>
+
+    </div>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
+<script src="js/jquery.validate.unobtrusive.min.js"></script>
+
+
+<!--Javascript -->
+<script src="js/jquery-3.6.0.min.js"></script>
+<script src="js/jquery-migrate-3.3.2.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.easing.js"></script>
+<script src="js/jquery-waypoints.js"></script>
+<script src="js/jquery-validate.js"></script>
+<script src="js/jquery.prettyPhoto.js"></script>
+<script src="js/slick.min.js"></script>
+<script src="js/numinate.min.js"></script>
+<script src="js/imagesloaded.min.js"></script>
+<script src="js/jquery-isotope.js"></script>
+<script src="js/main.js"></script>
+<!-- Javascript end-->
+<!-- Revolution Slider -->
+<script src="js/revolution.tools.min.js"></script>
+<script src="js/rs6.min.js"></script>
+<script src="js/slider.js"></script>
+
+<!-- Javascript end-->
+    <script src="js/lms.js"></script>
+
+    <!-- Modal -->
+    <div b-jkv0ph5dyo="" class="modal fade" id="cprModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div b-jkv0ph5dyo="" class="modal-dialog modal-dialog-centered modal-dialog-scrollable" id="modelContent">
+
+        </div>
+    </div>
+
+    
+
+
+
+
+<script src="js/supabase-config.js"></script><script src="js/verification.js" defer></script>
+
+
+
+
+</body></html>

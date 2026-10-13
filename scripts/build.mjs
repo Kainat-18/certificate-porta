@@ -1,4 +1,4 @@
-import { readFile, mkdir, copyFile, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, copyFile, writeFile, cp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -17,11 +17,13 @@ if (key.split('.').length === 3) {
   if (claims.role !== 'anon') throw new Error('Only a legacy anon JWT key is allowed in the browser.');
 }
 // Explicit asset list keeps backups, SQL, and development files out of hosting.
-for (const relative of ['index.html', 'css/certificates.css', 'js/certificates.js', 'images/sha.png']) {
+for (const relative of ['index.html', 'manage.html']) {
   const destination = path.join(root, 'dist', relative);
   await mkdir(path.dirname(destination), { recursive: true });
   await copyFile(path.join(root, relative), destination);
 }
-await mkdir(path.join(root, 'dist/js'), { recursive: true });
+for (const directory of ['css', 'js', 'images', 'fonts']) {
+  await cp(path.join(root, directory), path.join(root, 'dist', directory), { recursive: true });
+}
 await writeFile(path.join(root, 'dist/js/supabase-config.js'), `window.SUPABASE_CONFIG = ${JSON.stringify({ url, key })};\n`);
 console.log('Certificate portal built in dist/.');
