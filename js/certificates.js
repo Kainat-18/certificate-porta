@@ -11,9 +11,9 @@
   let client;
   try {
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-    client = createClient(config.url, config.key);
+    client = createClient(config.url, config.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
   } catch { message('Unable to load Supabase. Check your connection and configuration.', true); return; }
-  let user = null, editing = null, records = [], searchVersion = 0;
+  let editing = null, records = [], searchVersion = 0;
   const form = $('certificate-form');
   const busy = async (target, action) => {
     const buttons = [...target.querySelectorAll('button')];
@@ -62,33 +62,18 @@
       controls.append(actions); tr.append(controls); $('entries').append(tr);
     }
   }
-  async function sync(session) {
-    user = session?.user || null;
-    $('auth-form').hidden = !!user; $('workspace').hidden = !user;
-    $('entries').replaceChildren(); records = []; reset();
-    if (user) { $('account').textContent = user.email; await load(); }
-  }
   $('search-form').addEventListener('submit', e => { e.preventDefault(); busy(e.currentTarget, async () => {
     const serial = $('search-serial').value.trim().toUpperCase(); $('search-serial').value = serial;
     const url = new URL(location.href); url.searchParams.set('id', serial); history.replaceState(null, '', url);
     await search(serial);
   }); });
-  $('auth-form').addEventListener('submit', e => { e.preventDefault(); const signup = e.submitter?.value === 'signup'; busy(e.currentTarget, async () => {
-    const credentials = { email: $('email').value.trim(), password: $('password').value };
-    const { data, error } = signup ? await client.auth.signUp(credentials) : await client.auth.signInWithPassword(credentials);
-    if (error) throw error;
-    $('password').value = '';
-    message(signup && !data.session ? 'Check your email to confirm your account, then sign in.' : 'Signed in successfully.');
-  }); });
-  $('logout').addEventListener('click', () => busy($('workspace'), async () => { const { error } = await client.auth.signOut(); if (error) throw error; message('Signed out.'); }));
   form.addEventListener('submit', e => { e.preventDefault(); busy(form, async () => {
-    if (!user) throw new Error('Sign in first.');
     const values = new FormData(form);
     const payload = Object.fromEntries(['serial_number','holder_name','course_name','valid_from','expiry_date'].map(key => [key, values.get(key).trim()]));
     payload.serial_number = payload.serial_number.toUpperCase(); payload.is_active = values.has('is_active');
     if (!payload.holder_name || !payload.course_name) throw new Error('Holder and course name are required.');
     if (payload.expiry_date < payload.valid_from) throw new Error('Expiry date must be on or after the valid-from date.');
-    const { data, error } = await (editing ? client.from('certificates').update(payload).eq('id', editing) : client.from('certificates').insert({ ...payload, owner_id: user.id })).select('id');
+    const { data, error } = await (editing ? client.from('certificates').update(payload).eq('id', editing) : client.from('certificates').insert(payload)).select('id');
     if (error) throw error;
     if (!data.length) throw new Error('Entry was not saved. Refresh and try again.');
     reset(); message('Certificate saved.'); await load(); await refreshSearch();
@@ -116,13 +101,7 @@
       await load(); await refreshSearch();
     });
   });
-  client.auth.onAuthStateChange((event, session) => {
-    if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
-    if (session?.user?.id === user?.id) return;
-    setTimeout(() => sync(session).catch(e => message(e.message, true)), 0);
-  });
-  const { data, error } = await client.auth.getSession();
-  if (error) message(error.message, true); else await sync(data.session).catch(e => message(e.message, true));
+  await load().catch(e => message(e.message, true));
   const serial = new URLSearchParams(location.search).get('id');
   if (serial) { $('search-serial').value = serial; await search(serial).catch(e => message(e.message, true)); }
 })();
