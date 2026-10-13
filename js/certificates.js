@@ -70,7 +70,7 @@
   form.addEventListener('submit', e => { e.preventDefault(); busy(form, async () => {
     const values = new FormData(form);
     const payload = Object.fromEntries(['serial_number','holder_name','course_name','valid_from','expiry_date'].map(key => [key, values.get(key).trim()]));
-    payload.serial_number = payload.serial_number.toUpperCase(); payload.is_active = values.has('is_active');
+    payload.serial_number = payload.serial_number.toUpperCase(); payload.is_active = editing ? records.find(entry => entry.id === editing).is_active : true;
     if (!payload.holder_name || !payload.course_name) throw new Error('Holder and course name are required.');
     if (payload.expiry_date < payload.valid_from) throw new Error('Expiry date must be on or after the valid-from date.');
     const { data, error } = await (editing ? client.from('certificates').update(payload).eq('id', editing) : client.from('certificates').insert(payload)).select('id');
@@ -85,7 +85,6 @@
     if (button.dataset.action === 'edit') {
       editing = entry.id;
       for (const key of ['serial_number','holder_name','course_name','valid_from','expiry_date']) form.elements.namedItem(key).value = entry[key];
-      form.elements.namedItem('is_active').checked = entry.is_active;
       $('save').textContent = 'Update certificate'; $('cancel').hidden = false; form.scrollIntoView({ behavior:'smooth', block:'center' }); return;
     }
     if (button.dataset.action === 'delete' && !confirm(`Delete certificate ${entry.serial_number}? This cannot be undone.`)) return;
