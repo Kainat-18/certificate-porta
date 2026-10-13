@@ -1,4 +1,12 @@
 ﻿'use strict';
+function oneMonthAfter(value) {
+  if (!value) return '';
+  const [year, month, day] = value.split('-').map(Number);
+  const next = new Date(Date.UTC(year, month, 1));
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  next.setUTCDate(Math.min(day, lastDay));
+  return next.toISOString().slice(0, 10);
+}
 (async () => {
   const $ = id => document.getElementById(id);
   const config = window.SUPABASE_CONFIG || {};
@@ -15,6 +23,10 @@
   } catch { message('Unable to load Supabase. Check your connection and configuration.', true); return; }
   let editing = null, records = [];
   const form = $('certificate-form');
+  const validFrom = form.elements.namedItem('valid_from');
+  const updateExpiry = () => { form.elements.namedItem('expiry_date').value = oneMonthAfter(validFrom.value); };
+  validFrom.addEventListener('input', updateExpiry);
+  validFrom.addEventListener('change', updateExpiry);
   const busy = async (target, action) => {
     const buttons = [...target.querySelectorAll('button')];
     buttons.forEach(b => b.disabled = true);
@@ -23,7 +35,7 @@
   };
   const node = (tag, text, className) => { const el = document.createElement(tag); el.textContent = text; if (className) el.className = className; return el; };
   const date = value => new Date(value + 'T00:00:00').toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-  function reset() { editing = null; form.reset(); $('save').textContent = 'Save certificate'; $('cancel').hidden = true; }
+  function reset() { editing = null; form.querySelectorAll('option[data-existing]').forEach(option => option.remove()); form.reset(); $('save').textContent = 'Save certificate'; $('cancel').hidden = true; }
   async function load() {
     $('list-status').textContent = 'Loading entries…';
     const { data, error } = await client.from('certificates').select('id,serial_number,holder_name,course_name,valid_from,expiry_date,is_active').order('created_at', { ascending: false });
@@ -62,6 +74,14 @@
     const entry = records.find(item => item.id === button.dataset.id); if (!entry) return;
     if (button.dataset.action === 'edit') {
       editing = entry.id;
+      const courses = form.elements.namedItem('course_name');
+      courses.querySelectorAll('option[data-existing]').forEach(option => option.remove());
+      if (![...courses.options].some(option => option.value === entry.course_name)) {
+        const existing = node('option', entry.course_name);
+        existing.value = entry.course_name;
+        existing.dataset.existing = 'true';
+        courses.append(existing);
+      }
       for (const key of ['serial_number','holder_name','course_name','valid_from','expiry_date']) form.elements.namedItem(key).value = entry[key];
       $('save').textContent = 'Update certificate'; $('cancel').hidden = false; form.scrollIntoView({ behavior:'smooth', block:'center' }); return;
     }
