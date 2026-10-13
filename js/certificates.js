@@ -1,9 +1,9 @@
 ﻿'use strict';
-function oneMonthAfter(value) {
+function oneYearAfter(value) {
   if (!value) return '';
   const [year, month, day] = value.split('-').map(Number);
-  const next = new Date(Date.UTC(year, month, 1));
-  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const next = new Date(Date.UTC(year + 1, month - 1, 1));
+  const lastDay = new Date(Date.UTC(year + 1, month, 0)).getUTCDate();
   next.setUTCDate(Math.min(day, lastDay));
   return next.toISOString().slice(0, 10);
 }
@@ -24,7 +24,7 @@ function oneMonthAfter(value) {
   let editing = null, records = [];
   const form = $('certificate-form');
   const validFrom = form.elements.namedItem('valid_from');
-  const updateExpiry = () => { form.elements.namedItem('expiry_date').value = oneMonthAfter(validFrom.value); };
+  const updateExpiry = () => { form.elements.namedItem('expiry_date').value = oneYearAfter(validFrom.value); };
   validFrom.addEventListener('input', updateExpiry);
   validFrom.addEventListener('change', updateExpiry);
   const busy = async (target, action) => {
